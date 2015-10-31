@@ -46,11 +46,11 @@ On-premise data sources are typically exposed to Bluemix applications using user
 #### Binding user-defined services using the Bluemix web console
   * [Log in to Bluemix](https://console.ng.bluemix.net/).
   * Open the *DASHBOARD* and navigate to the space where you've deployed the application.
-  * Double-click on the ** on-prem-data-source-access-test** application tile.
+  * Double-click on the **on-prem-data-source-access-test** application tile.
   * Click **BIND A SERVICE OR API**.
-  * Select the desired service instance.
+  * Select the desired service instances.
 
-If you bind a service other than *user-defined* it is ignored by the application.
+If you bind a service other than *user-defined*, it is ignored by the application.
 
 Refresh the application web page to view the test results.  
 
