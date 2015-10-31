@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>On-premise data source access test application</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	
+	<script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/1.10.9/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.9/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css"> 
+
+   <script>
+	$(document).ready(function() {
+	    var t = $('#testresults').DataTable({"language": {"emptyTable":"Test in progress..."},
+	    									 "paging": false,
+	    									 "searching": false,
+	    									 "info": false,
+	    									 "processing": true});
+
+	    $.get("/api/test", function( data ) {
+	    
+	    	// return data JSON structure: {"services":[{"svc_name":"STRING_VALUE","on_prem_resource_type":"STRING_VALUE","success":"BOOLEAN_VALUE","output":"STRING_VALUE"},...]}
+			var resultset = JSON.parse(data);												
+			var hasError = false; 
+			
+			if (resultset.services.length > 0) {
+				// one or more user-defined services are bound to the application
+	    		resultset.services.forEach(function(row){
+	    		
+	    			// display the resaults for each service
+	    			// debug only console.log(JSON.stringify(row));
+	    		
+	    			if(! row.on_prem_resource_type) {
+	    			 // if the resource type could not be determined, set it to unknown
+	    			 row.on_prem_resource_type = "UNKNOWN";
+	    			}
+	    			t.row.add([row.svc_name, row.on_prem_resource_type, row.output]).draw(false);
+		
+	    			if(row.success == "false") {
+	    			 // access to the data source was not successful
+	    			 hasError = true;
+	    			}
+	    		});
+	    	
+	    		if(hasError) {
+	    		    // display basic troubleshooting information  
+	    			document.getElementById("advise").style.display='block';
+	    		}	    		
+	    	}
+	    	else {
+	    	 // no user-defined services are bound to the application
+				t.row.add(['', '', 'No user-defined services are bound to this application.']).draw(false);
+	    	}
+	 	});
+	});
+
+</script>
+
+</head>
+<body>
+
+	<div class="container">
+	   <div class="row">
+		<h3>On-premise data source connectivity validation</h3>
+    	<p>
+    	To verify that Bluemix applications can connect to your on-premise databases, create user-defined services and bind them to this sample application as described in <a href="https://github.com/ibm-cds-labs/accessing-on-premise-data-sources-java-sample">this article</a>.
+    	</p>
+	   </div>
+    
+	   <div class="row">
+		<table id="testresults" class="display" >
+		 <thead>
+	    	<tr>
+	    		<th>User-defined service</th>
+	    		<th>Data source type</th>
+	        	<th style="width:70%">Test result</th>
+	    	</tr>
+		 </thead>
+        </table>
+	   </div>
+	   
+	   <div id="advise" class="row" style="display: none">
+        <p>
+    	  At least one connectivity test failed. To troubleshoot reported issues: 
+    	  <ul>
+    	    <li>Make sure the jdbcUrl property is set in the user-defined service. This sample application uses the URL to connect to the data source.</li>
+    	    <li>Verify the Secure Gateway destination configuration in Bluemix.</li>
+    	    <li>Inspect firewall log files and the Secure Gateway client log file in the data source environment.</li>
+    	  </ul>    
+    	</p>
+       </div>
+       
+       <div class="row">
+    	<p>
+    	<a href="https://github.com/ibm-cds-labs/accessing-on-premise-data-sources-java-sample">Learn more about this sample application.</a>
+    	</p>
+       </div>
+  </div>
+	
+</body>
+</html>

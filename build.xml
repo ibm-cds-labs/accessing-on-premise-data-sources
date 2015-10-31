@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project basedir="." default="build" name="OnPremDataSourceAccessTest">
+    <property environment="env"/>
+    <property name="srcDir" value="src/main/java"/>
+	<property name="tgtDir" value="WebContent/WEB-INF/classes"/>
+	<property name="distDir" value="target"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.8"/>
+    <property name="source" value="1.8"/>
+    <condition property="ARCHIVE_DIR" value="${env.ARCHIVE_DIR}" else="${distDir}">
+        <isset property="env.ARCHIVE_DIR" />
+    </condition>
+	<property name="warname" value= "OnPremDataSourceAccessTest.war"/>
+    <path id="classpathDir">
+        <pathelement location="${tgtDir}"/>
+        <pathelement location="dep-jar/com.ibm.ws.javaee.jaxrs.1.1_1.0.1.jar"/>
+        <pathelement location="dep-jar/com.ibm.json4j_1.0.9.jar"/>
+    </path>
+    <target name="init">
+        <mkdir dir="${tgtDir}"/>
+    </target>
+    <target name="clean">
+        <delete dir="${tgtDir}"/>
+		<delete file="${ARCHIVE_DIR}/${warname}" />		
+    </target>
+    <target name="build" depends="build-project,build-war"/>
+    <target name="cleanall" depends="clean"/>
+    <target name="build-project" depends="clean,init">
+    	<copy todir="${ARCHIVE_DIR}">
+	      <fileset file="manifest.yml" />
+	    </copy>
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="false" debuglevel="${debuglevel}" destdir="${tgtDir}" source="${source}" target="${target}"
+		includeantruntime="false">
+            <src path="${srcDir}"/>
+            <classpath refid="classpathDir"/>
+        </javac>
+    </target>
+ 
+   <target name="build-war" depends="build-project">
+	  <war destfile="${ARCHIVE_DIR}/${warname}" webxml="WebContent/WEB-INF/web.xml">
+	  	<webinf dir="WebContent/WEB-INF">
+	  		<include name="resources"/>
+	    </webinf>
+	  	<fileset dir="WebContent">
+	  		<include name="**/*"/>
+	    </fileset>
+	  	<!-- <classes dir="${tgtDir}"/> -->
+	  </war>
+   </target>
+
+</project>
