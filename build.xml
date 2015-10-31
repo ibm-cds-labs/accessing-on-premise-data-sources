@@ -50,4 +50,14 @@
 	  </war>
    </target>
 
+   <target name="remove-tracker">
+      <delete>
+        <fileset dir="WebContent/WEB-INF/lib/" includes="cf-java-app-tracker-client-*.jar"/>
+      </delete>
+   </target>
+
+   <target name="build-plain-war" depends="remove-tracker,build-war">
+   </target>
+
+
 </project>

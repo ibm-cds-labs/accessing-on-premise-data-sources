@@ -17,7 +17,7 @@ You can deploy this application to Bluemix using the button provided below or ma
 
 The fastest way to deploy this application to Bluemix is to click the button. 
 
-[![Deploy to Bluemix](https://hub.jazz.net/deploy/button_x2.png)](https://bluemix.net/deploy?repository=https://github.com/ibm-cds-labs/on-prem-connectivity-test-java-sample)
+[![Deploy to Bluemix](https://deployment-tracker.mybluemix.net/stats/342af0e859ee71ef16193deff87d5771/button.svg)](https://bluemix.net/deploy?repository=https://github.com/ibm-cds-labs/on-prem-connectivity-test-java-sample.git)
 
 **Don't have a Bluemix account?** If you haven't already, you'll be prompted to [sign up](http://www.ibm.com/cloud-computing/bluemix/) for a Bluemix account when you click the button.  Sign up, verify your email address, then return here and click the the **Deploy to Bluemix** button again. Your new credentials let you deploy to the platform and also to code online with Bluemix and Git. If you have questions about working in Bluemix, find answers in the [Bluemix Docs](https://www.ng.bluemix.net/docs/).
 
@@ -68,7 +68,20 @@ If you bind a service other than *user-defined* it is ignored by the application
 
 Refresh the application web page to view the test results.  
 
+### Privacy Notice
 
+This web application includes code to track deployments to [IBM Bluemix](https://www.bluemix.net/) and other Cloud Foundry platforms. The following information is sent to a [Deployment Tracker](https://github.com/cloudant-labs/deployment-tracker) service on each deployment:
+
+* Application Name (`application_name`)
+* Space ID (`space_id`)
+* Application Version (`application_version`)
+* Application URIs (`application_uris`)
+
+This data is collected from the `VCAP_APPLICATION` environment variable in IBM Bluemix and other Cloud Foundry platforms. This data is used by IBM to track metrics around deployments of sample applications to IBM Bluemix to measure the usefulness of our examples, so that we can continuously improve the content we offer to you. Only deployments of sample applications that include code to ping the Deployment Tracker service will be tracked.
+
+#### Disabling Deployment Tracking
+
+To disable deployment tracking rebuild the war file using the `build-plain-war` target and deploy the app.
 
 ### License
 
