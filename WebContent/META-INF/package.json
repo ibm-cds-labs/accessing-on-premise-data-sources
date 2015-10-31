@@ -1,0 +1,8 @@
+{
+ "name": "on-prem-data-source-access-test",
+ "version": "0.5.0",
+ "repository": {
+    "type": "git",
+    "url": "https://github.com/ibm-cds-labs/on-prem-connectivity-test-java-sample.git"
+ }
+}
