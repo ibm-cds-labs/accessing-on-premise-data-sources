@@ -1,5 +1,4 @@
 *.class
 # ignore everything in output directories (compiled classes, JAR files and generated documentation)
-/WEB-INF/classes/*
 /target/*
 /doc/*

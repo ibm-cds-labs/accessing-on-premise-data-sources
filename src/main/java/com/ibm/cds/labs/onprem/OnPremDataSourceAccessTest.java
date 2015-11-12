@@ -25,10 +25,10 @@ import com.ibm.json.java.JSONObject;
 
 @Path("/test")
 public class OnPremDataSourceAccessTest {
-
+			
 	/**
-	 * This method determines which user-defined services have been bound to the sample application and tries to connect
-	 * to the underlying on-premise data sources. The results are returned to the caller for each supported data source.
+	 * This method determines which user-provided services have been bound to the sample application and tries to connect
+	 * to the underlying on-premises data sources. The results are returned to the caller for each supported data source.
 	 * @return A JSON string {"result":[{"svc_name":"STRING_VALUE","on_prem_resource_type":"STRING_VALUE","success":"BOOLEAN_VALUE","output":"STRING_VALUE"},...]} 
 	 *         All properties are mandatory, with the exception of the on_prem_resource_type. This property is not set if the type cannot be determined.
 	 */
@@ -53,7 +53,7 @@ public class OnPremDataSourceAccessTest {
 				// check whether user-provided services were bound to this application
 				up_services = (JSONArray) services.get("user-provided");
 				if((up_services == null) || (up_services.isEmpty())) {
-					message = "Error: no user-defined service is bound to this application.";
+					message = "Error: no user-provided service is bound to this application.";
 				}
 				else {
 					JSONObject svc = null;
@@ -61,7 +61,7 @@ public class OnPremDataSourceAccessTest {
 					JSONObject credentials = null;
 					String jdbcurl = null;
 
-					// process each bound user-defined service
+					// process each bound user-provided service
 					for(Object serviceobj: up_services) {
 						svcresult = new JSONObject();
 						svc = (JSONObject) serviceobj;
@@ -76,10 +76,10 @@ public class OnPremDataSourceAccessTest {
 									 jdbcurl="";
 								 // the JDBCURL property value is either not set or appears to be incorrect
 								 svcresult.put("success","false");
-								 svcresult.put("output","Test was skipped. The user-defined service does not define the jdbcUrl property or the property value "+ jdbcurl + " is invalid.");
+								 svcresult.put("output","Test was skipped. The user-provided service does not define the jdbcUrl property or the property value "+ jdbcurl + " is invalid.");
 							 }
 							 else {
- 								 // the jdbcUrl property is  defined for this user-defined service
+ 								 // the jdbcUrl property is  defined for this user-provided service
 								 OnPremDataSource resource = null;
 								 
 								 // the jdbcUrl property is set; it should look as follows: jdbc:<driver>://...
@@ -89,41 +89,36 @@ public class OnPremDataSourceAccessTest {
 								 // save the URI scheme - it identifies the resource's type
 								 svcresult.put("on_prem_resource_type", uri.getScheme().toUpperCase());
 								 
-								 if(("db2").equalsIgnoreCase(uri.getScheme())) {
-									// create a DB2 on-prem resource
-									 resource = new DB2OnPremDataSource((String)credentials.get("jdbcurl"), (String)credentials.get("user"), (String)credentials.get("password"));
-								 }
-								 
-								 // the resource type can be processed 
-								 if(resource != null) {
-									 // connect to the resource
-									 resource.connect();
-									 // run the dummy query
-									 String result = resource.runQuery();
+								 // throws OnPremDataSourceNotSupportedException if no suitable test driver is found 
+								 resource = new RelationalOnPremDataSource(uri.getScheme().toLowerCase(), (String)credentials.get("jdbcurl"), (String)credentials.get("user"), (String)credentials.get("password"));							 
+								 								 
+								 // connect to the resource
+								 resource.connect();
+								 // run the dummy query
+								 String result = resource.runQuery();
 								
-									 if(result != null) {
-										 // a result was returned; it appears that the on-premise resource is accessible
-										 svcresult.put("success","true");
-										 svcresult.put("output","The test query executed successfully on the on-premise database.");	
-									 }
-									 else {
-										 // no result was returned; it appears that the on-premise resource cannot be accessed properly
-										 svcresult.put("success","false");
-										 svcresult.put("output","The test query did not return a result from the on-premise database.");									
-									 }
-									 // disconnect from the data source to release all allocated resources
-									 resource.disconnect();
-								 } 
-								 else {
-									// the resource type cannot be processed
-									 svcresult.put("success","false");
-									 svcresult.put("output","Test was skipped. The user-defined service references a JDBC data source of type "+ uri.getScheme().toUpperCase() + ", which is not yet supported by this sample application.");									 
+								 if(result != null) {
+									 // a result was returned; it appears that the on-premises resource is accessible
+									 svcresult.put("success","true");
+									 svcresult.put("output","The test query executed successfully on the on-premises database.");	
 								 }
+								 else {
+									 // no result was returned; it appears that the on-premises resource cannot be accessed properly
+									 svcresult.put("success","false");
+									 svcresult.put("output","The test query did not return a result from the on-premises database.");									
+								 }
+								 // disconnect from the data source to release all allocated resources
+								 resource.disconnect();
 								 
-							 } // the jdbcUrl property is  defined for this user-defined service
+							 } // the jdbcUrl property is  defined for this user-provided service
 						 } // try
+						 catch(OnPremDataSourceNotSupportedException opdsnsex) {
+							// the resource type cannot be processed
+							 svcresult.put("success","false");
+							 svcresult.put("output","Test was skipped. The user-provided service references a JDBC data source of type "+ opdsnsex.getMessage() + ", which is currently not supported by this utility.");									 							 
+						 }
 						 catch(OnPremDataSourceAccessTestException opex) {
-							 	// a problem was encountered while trying to connect to the data source or running the summy query
+							 	// a problem was encountered while trying to connect to the data source or running the dummy query
 								System.err.println(opex.getMessage());
 								message = "Test failed: " + opex.getMessage();
 								if(opex.getCause() != null) {
@@ -137,7 +132,7 @@ public class OnPremDataSourceAccessTest {
 						svclist.add(svcresult);
 					} // for
 					
-				} // no user-defined services are defined
+				} // no user-provided services are defined
 			} // if(services)
 		} // try
 		catch(Exception ex) {

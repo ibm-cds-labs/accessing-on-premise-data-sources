@@ -31,9 +31,7 @@ To manually deploy this application to Bluemix:
 
     $ cd on-prem-connectivity-test-java-sample
 
-    $ ant 
-
-    $ cd target
+    $ mvn 
 
     $ cf push
 
