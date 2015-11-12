@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>On-premise data source access test application</title>
+	<title>On-premises data source access test application</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	
 	<script type="text/javascript" src="//code.jquery.com/jquery-1.11.3.min.js"></script>
@@ -17,6 +17,27 @@
 	    									 "searching": false,
 	    									 "info": false,
 	    									 "processing": true});
+		
+		$.get("/api/meta", function(metadataJSON) {
+			// return data JSON structure: {"version":"VERSION_VALUE","supported_on_prem_resource_types":["STRING_VALUE","..."]} 
+			var metadata = JSON.parse(metadataJSON);
+			
+			if(metadata.supported_on_prem_resource_types.length > 0) {
+			    var data_source_type_list = "";
+			    $.each(metadata.supported_on_prem_resource_types.sort(), function(index, val) {
+	    
+			      data_source_type_list = data_source_type_list + val;
+			      if((index + 1 )< metadata.supported_on_prem_resource_types.length) {
+			      	data_source_type_list = data_source_type_list + ",";
+			      }
+			    });
+			    $(".intro").append(data_source_type_list);
+				}
+			else {
+				$(".intro").append("none");
+			}			
+		});
+
 
 	    $.get("/api/test", function( data ) {
 	    
@@ -25,7 +46,7 @@
 			var hasError = false; 
 			
 			if (resultset.services.length > 0) {
-				// one or more user-defined services are bound to the application
+				// one or more user-provided services are bound to the application
 	    		resultset.services.forEach(function(row){
 	    		
 	    			// display the resaults for each service
@@ -46,11 +67,12 @@
 	    		if(hasError) {
 	    		    // display basic troubleshooting information  
 	    			document.getElementById("advise").style.display='block';
+	    			document.getElementById("advise").style='margin-top: 10px'
 	    		}	    		
 	    	}
 	    	else {
-	    	 // no user-defined services are bound to the application
-				t.row.add(['', '', 'No user-defined services are bound to this application.']).draw(false);
+	    	 // no user-provided services are bound to the application
+				t.row.add(['', '', 'No user-provided services are bound to this application.']).draw(false);
 	    	}
 	 	});
 	});
@@ -62,17 +84,18 @@
 
 	<div class="container">
 	   <div class="row">
-		<h3>On-premise data source connectivity validation</h3>
-    	<p>
-    	To verify that Bluemix applications can connect to your on-premise databases, create user-defined services and bind them to this sample application as described in <a href="https://github.com/ibm-cds-labs/accessing-on-premise-data-sources-java-sample">this article</a>.
-    	</p>
+		<h3>On-premises data source connectivity validation</h3>
+    	<div class="intro">
+    	To verify that Bluemix applications can connect to your on-premises databases, create user-provided services and bind them to this sample application as described in <a href="https://developer.ibm.com/clouddataservices/access-an-on-premises-db2-data-server-from-the-bluemix-cloud/">this tutorial</a>.
+    	The application is configured for access to the following data source types:
+    	</div>
 	   </div>
     
 	   <div class="row">
 		<table id="testresults" class="display" >
 		 <thead>
 	    	<tr>
-	    		<th>User-defined service</th>
+	    		<th>User-provided service</th>
 	    		<th>Data source type</th>
 	        	<th style="width:70%">Test result</th>
 	    	</tr>
@@ -81,20 +104,16 @@
 	   </div>
 	   
 	   <div id="advise" class="row" style="display: none">
-        <p>
     	  At least one connectivity test failed. To troubleshoot reported issues: 
     	  <ul>
-    	    <li>Make sure the jdbcUrl property is set in the user-defined service. This sample application uses the URL to connect to the data source.</li>
+    	    <li>Make sure the jdbcUrl property is set in the user-provided service. This sample application uses a JDBC driver to connect to the data source.</li>
     	    <li>Verify the Secure Gateway destination configuration in Bluemix.</li>
     	    <li>Inspect firewall log files and the Secure Gateway client log file in the data source environment.</li>
     	  </ul>    
-    	</p>
        </div>
-       
+
        <div class="row">
-    	<p>
-    	<a href="https://github.com/ibm-cds-labs/accessing-on-premise-data-sources-java-sample">Learn more about this sample application.</a>
-    	</p>
+    	 [<a href="https://github.com/ibm-cds-labs/accessing-on-premise-data-sources-java-sample">Learn more about this application...</a>]
        </div>
   </div>
 	

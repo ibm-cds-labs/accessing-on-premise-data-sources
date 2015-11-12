@@ -1,6 +1,6 @@
 applications:
 - name: on-prem-data-source-access-test 
-  path: OnPremDataSourceAccessTest.war
+  path: target/OnPremDataSourceAccessTest-0.1.0.war
   memory: 512M
   instances: 1
   host: on-prem-data-source-access-test-${random-word}

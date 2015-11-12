@@ -1,0 +1,25 @@
+{
+ "version" : "0.1",
+ "connectors": [
+   {
+   			"url_scheme": "db2",
+  	 		"display_name": "DB2",
+   			"driver" : "com.ibm.db2.jcc.DB2Driver",
+   			"query" : "SELECT current date FROM sysibm.sysdummy1"
+   		
+   },
+   {
+  			 "url_scheme": "mysql",
+   			 "display_name": "MySQL",
+   			 "driver" : "com.mysql.jdbc.Driver",
+   			 "query" : "SELECT current_date"
+   },
+   {
+  			 "url_scheme": "postgresql",
+   			 "display_name": "PostgreSQL",
+   			 "driver" : "org.postgresql.Driver",
+   			 "query" : "SELECT current_date"
+   }  
+ ]
+}
+		

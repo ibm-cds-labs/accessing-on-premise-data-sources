@@ -3,15 +3,16 @@
 <project basedir="." default="build" name="OnPremDataSourceAccessTest">
     <property environment="env"/>
     <property name="srcDir" value="src/main/java"/>
-	<property name="tgtDir" value="WebContent/WEB-INF/classes"/>
+	<property name="tgtDir" value="target/classes"/>
 	<property name="distDir" value="target"/>
     <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.7"/>
-    <property name="source" value="1.7"/>
+    <property name="target" value="1.8"/>
+    <property name="source" value="1.8"/>
     <condition property="ARCHIVE_DIR" value="${env.ARCHIVE_DIR}" else="${distDir}">
         <isset property="env.ARCHIVE_DIR" />
     </condition>
-	<property name="warname" value= "OnPremDataSourceAccessTest.war"/>
+	<property name="version" value="0.1.0"/>
+	<property name="warname" value= "OnPremDataSourceAccessTest-${version}.war"/>
     <path id="classpathDir">
         <pathelement location="${tgtDir}"/>
         <pathelement location="dep-jar/com.ibm.ws.javaee.jaxrs.1.1_1.0.1.jar"/>
@@ -27,9 +28,9 @@
     <target name="build" depends="build-project,build-war"/>
     <target name="cleanall" depends="clean"/>
     <target name="build-project" depends="clean,init">
-    	<copy todir="${ARCHIVE_DIR}">
+    	<!-- <copy todir="${ARCHIVE_DIR}">
 	      <fileset file="manifest.yml" />
-	    </copy>
+	    </copy> -->
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="false" debuglevel="${debuglevel}" destdir="${tgtDir}" source="${source}" target="${target}"
 		includeantruntime="false">
@@ -39,25 +40,18 @@
     </target>
  
    <target name="build-war" depends="build-project">
-	  <war destfile="${ARCHIVE_DIR}/${warname}" webxml="WebContent/WEB-INF/web.xml">
-	  	<webinf dir="WebContent/WEB-INF">
+	  <war destfile="${ARCHIVE_DIR}/${warname}" webxml="src/main/webapp/WEB-INF/web.xml">
+	  	<webinf dir="src/main/webapp/WEB-INF">
 	  		<include name="resources"/>
 	    </webinf>
-	  	<fileset dir="WebContent">
+	  	<fileset dir="src/main/resources/">
 	  		<include name="**/*"/>
 	    </fileset>
+        <fileset dir="src/main/webapp/">
+            <include name="**/*"/>
+        </fileset>
 	  	<!-- <classes dir="${tgtDir}"/> -->
 	  </war>
    </target>
-
-   <target name="remove-tracker">
-      <delete>
-        <fileset dir="WebContent/WEB-INF/lib/" includes="cf-java-app-tracker-client-*.jar"/>
-      </delete>
-   </target>
-
-   <target name="build-plain-war" depends="remove-tracker,build-war">
-   </target>
-
 
 </project>
