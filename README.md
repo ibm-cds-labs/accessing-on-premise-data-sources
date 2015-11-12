@@ -6,7 +6,7 @@ Use this utility to validate that Bluemix applications can access on-premise dat
 
 For a quick introduction on how to configure the gateway service, set up user-provided services and prepare your on-premise environment, read [the tutorial](https://developer.ibm.com/clouddataservices/access-an-on-premises-db2-data-server-from-the-bluemix-cloud/).
 
-Out of the box, this application supports DB2 for Linux, Unix and Windows databases. You can extend this application by creating a custom connector for other data sources.
+This application has been pre-configured for DB2*, MySQL and PostgreSQL databases. To configure support for other RDBMSs follow [these instructions](https://github.com/ibm-cds-labs/on-prem-connectivity-test-java-sample/wiki/Adding-support-for-additional-relational-databases). Note that the pre-configured application does not include the DB2 license file `db2jcc_license_cu.jar` (DB2 LUW) or `db2jcc_license_cisuz.jar` (DB2 for z/OS). Follow above instructions to make the appropriate library available to the application. 
 
 ## Deploy to IBM Bluemix
 
