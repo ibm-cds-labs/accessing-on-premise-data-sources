@@ -12,70 +12,105 @@
 
    <script>
 	$(document).ready(function() {
-	    var t = $('#testresults').DataTable({"language": {"emptyTable":"Test in progress..."},
-	    									 "paging": false,
-	    									 "searching": false,
-	    									 "info": false,
-	    									 "processing": true});
 		
 		$.get("/api/meta", function(metadataJSON) {
-			// return data JSON structure: {"version":"VERSION_VALUE","supported_on_prem_resource_types":["STRING_VALUE","..."]} 
+			// return data JSON structure: {"version":"VERSION_VALUE","supported_on_prem_resource_types":["STRING_VALUE","..."], 
+			//                              "error": {"message":"STRING_VALUE", "link":"URL"}
+		    //                             } 
 			var metadata = JSON.parse(metadataJSON);
-			
-			if(metadata.supported_on_prem_resource_types.length > 0) {
-			    var data_source_type_list = "";
-			    $.each(metadata.supported_on_prem_resource_types.sort(), function(index, val) {
-	    
-			      data_source_type_list = data_source_type_list + val;
-			      if((index + 1 )< metadata.supported_on_prem_resource_types.length) {
-			      	data_source_type_list = data_source_type_list + ",";
-			      }
-			    });
-			    $(".intro").append(data_source_type_list);
+
+			if(metadata.error) {
+				// a fatal error was encountered. Display the information
+				document.getElementById("supportedds").style.display='none';
+				// a fatal error was encountered
+				// hide the test result table
+				document.getElementById("testresults").style.display='none';
+				// display the error message and (optional) link
+				var text = 'Error: ' + metadata.error.message;
+				if(metadata.error.link) {
+					text = text + ' Refer to <a href="' + metadata.error.link + '" target="_blank"> this document</a>  for troubleshooting information.';
 				}
+				document.getElementById("errmessage").innerHTML=text;
+				document.getElementById("fatal_config_error").style.display='block';
+				document.getElementById("fatal_config_error").style='margin-top: 10px';
+			}
 			else {
-				$(".intro").append("none");
-			}			
-		});
-
-
-	    $.get("/api/test", function( data ) {
+				// display list of supported data source types			
+				if(metadata.supported_on_prem_resource_types.length > 0) {
+			    	var data_source_type_list = "";
+				    $.each(metadata.supported_on_prem_resource_types.sort(), function(index, val) {
 	    
-	    	// return data JSON structure: {"services":[{"svc_name":"STRING_VALUE","on_prem_resource_type":"STRING_VALUE","success":"BOOLEAN_VALUE","output":"STRING_VALUE"},...]}
-			var resultset = JSON.parse(data);												
-			var hasError = false; 
+				      data_source_type_list = data_source_type_list + val;
+				      if((index + 1 )< metadata.supported_on_prem_resource_types.length) {
+				      	data_source_type_list = data_source_type_list + ",";
+			    	  }
+			    	});
+			    	$(".supportedds").append(data_source_type_list);
+					}
+				else {
+					$(".supportedds").append("none");
+				}
+
+				var t = $('#testresults').DataTable({"language": {"emptyTable":"Test in progress..."},
+	    									         "paging": false,
+	    									         "searching": false,
+	    									         "info": false,
+	    									         "processing": true});
+
+				// run the connectivity tests
+
+				$.get("/api/test", function( data ) {
+	    
+	    			// return data JSON structure: {"error":"STRING_VALUE", "services":[{"svc_name":"STRING_VALUE","on_prem_resource_type":"STRING_VALUE","success":"BOOLEAN_VALUE","output":"STRING_VALUE"},...]}
+					var resultset = JSON.parse(data);	
+
+					if(resultset.error) {
+						// a fatal error was encountered
+						// hide the test result table
+						document.getElementById("testresults").style.display='none';
+						// display the error message
+						document.getElementById("fatal_config_error").style.display='block';
+						document.getElementById("errmessage").innerHTML=resultset.error;
+					} else {
+
+					var hasError = false; 
 			
-			if (resultset.services.length > 0) {
-				// one or more user-provided services are bound to the application
-	    		resultset.services.forEach(function(row){
+					if (resultset.services.length > 0) {
+						// one or more user-provided services are bound to the application
+	    				resultset.services.forEach(function(row){
+	    				
+		    				// display the resaults for each service
+			    			// debug only console.log(JSON.stringify(row));
 	    		
-	    			// display the resaults for each service
-	    			// debug only console.log(JSON.stringify(row));
-	    		
-	    			if(! row.on_prem_resource_type) {
-	    			 // if the resource type could not be determined, set it to unknown
-	    			 row.on_prem_resource_type = "UNKNOWN";
-	    			}
-	    			t.row.add([row.svc_name, row.on_prem_resource_type, row.output]).draw(false);
+		    				if(! row.on_prem_resource_type) {
+			    			 // if the resource type could not be determined, set it to unknown
+	    				 	row.on_prem_resource_type = "UNKNOWN";
+	    					}
+		    				t.row.add([row.svc_name, row.on_prem_resource_type, row.output]).draw(false);
 		
-	    			if(row.success == "false") {
-	    			 // access to the data source was not successful
-	    			 hasError = true;
-	    			}
-	    		});
+		    				if(row.success == "false") {
+		    				 	// access to the data source was not successful
+			    			 	hasError = true;
+		    				}
+	    				});
 	    	
-	    		if(hasError) {
-	    		    // display basic troubleshooting information  
-	    			document.getElementById("advise").style.display='block';
-	    			document.getElementById("advise").style='margin-top: 10px'
-	    		}	    		
-	    	}
-	    	else {
-	    	 // no user-provided services are bound to the application
-				t.row.add(['', '', 'No user-provided services are bound to this application.']).draw(false);
-	    	}
-	 	});
-	});
+	    				if(hasError) {
+	    			    	// display basic troubleshooting information  
+		    				document.getElementById("advise").style.display='block';
+		    				document.getElementById("advise").style='margin-top: 10px';
+	    				}	    		
+	    			} // resultset.services.length > 0
+	    			else {
+	    	 			// no user-provided services are bound to the application
+						t.row.add(['', '', 'No user-provided services are bound to this application.']).draw(false);
+	    			}
+	    		} // resultset.error
+	 		}); // $.get("/api/test",	
+ 
+			}	// else		
+		}); // $.get("/api/meta",
+ 
+	}); // $(document).ready(function()
 
 </script>
 
@@ -85,8 +120,10 @@
 	<div class="container">
 	   <div class="row">
 		<h3>On-premises data source connectivity validation</h3>
-    	<div class="intro">
+    	<div>
     	To verify that Bluemix applications can connect to your on-premises databases, create user-provided services and bind them to this sample application as described in <a href="https://developer.ibm.com/clouddataservices/access-an-on-premises-db2-data-server-from-the-bluemix-cloud/">this tutorial</a>.
+    	</div>
+    	<div id="supportedds" class="supportedds">
     	The application is configured for access to the following data source types:
     	</div>
 	   </div>
@@ -103,16 +140,15 @@
         </table>
 	   </div>
 	   
-	   <div id="advise" class="row" style="display: none">
-    	  At least one connectivity test failed. To troubleshoot reported issues: 
-    	  <ul>
-    	    <li>Make sure the jdbcUrl property is set in the user-provided service. This sample application uses a JDBC driver to connect to the data source.</li>
-    	    <li>Verify the Secure Gateway destination configuration in Bluemix.</li>
-    	    <li>Inspect firewall log files and the Secure Gateway client log file in the data source environment.</li>
-    	  </ul>    
+	   <div id="fatal_config_error" class="row" style="display: none">
+    	   <p id="errmessage" class="bg-danger"></p>   
        </div>
 
-       <div class="row">
+	   <div id="advise" class="row" style="display: none">
+    	  At least one connectivity test failed. Please review the <a href="https://github.com/ibm-cds-labs/on-prem-connectivity-test-java-sample/wiki/Addressing-sample-application-issues" target="_blank"> troubleshooting information.</a>
+       </div>
+
+       <div class="row" style="margin-top: 10px">
     	 [<a href="https://github.com/ibm-cds-labs/accessing-on-premise-data-sources-java-sample">Learn more about this application...</a>]
        </div>
   </div>

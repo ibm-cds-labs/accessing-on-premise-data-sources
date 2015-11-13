@@ -23,8 +23,8 @@ import com.ibm.json.java.JSONObject;
 public class OnPremDataSourceAccessMetaData {
 
 	/**
-	 * This method returns information about the data source types that are supported by this application.
-	 * @return A JSON string {"version":"STRING_VALUE","supported_on_prem_resource_types":["STRING_VALUE",...]}
+	 * This method returns information about the data source types that are supported by this application or the optional error property, if a fatal error occurred.
+	 * @return A JSON string {"version":"STRING_VALUE","supported_on_prem_resource_types":["STRING_VALUE",...], "error":"STRING_VALUE"}
 	 */
 	@GET
 	public String getMeta() {
@@ -32,8 +32,17 @@ public class OnPremDataSourceAccessMetaData {
 		JSONObject metadata = new JSONObject();
 		metadata.put("version", "0.1");
 		JSONArray supportedDataSources = new JSONArray();
-		supportedDataSources.addAll(RelationalOnPremDataSource.getSupportedDataSources());
-		metadata.put("supported_on_prem_resource_types", supportedDataSources);
+		try {
+			supportedDataSources.addAll(OnPremDataSourceAccessTestConfiguration.getSupportedDataSources());
+			metadata.put("supported_on_prem_resource_types", supportedDataSources);
+		}
+		catch(OnPremDataSourceAccessTestConfigurationException opdsatce) {
+			JSONObject errinfo = new JSONObject();
+			errinfo.put("message",opdsatce.getMessage());			
+			errinfo.put("link", "https://github.com/ibm-cds-labs/on-prem-connectivity-test-java-sample/wiki/Addressing-sample-application-issues");			
+			metadata.put("error", errinfo);
+		}
+
 		return metadata.toString();
 		
 	} // getMeta	
