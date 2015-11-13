@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.io.IOException;
 
 import com.ibm.json.java.JSON;
 import com.ibm.json.java.JSONArray;
@@ -33,119 +34,27 @@ import com.ibm.json.java.JSONObject;
  *
  */
 public class RelationalOnPremDataSource extends OnPremDataSource {
-
-	// list of supported data source types
-	private static final Map<String,DatabaseAccessTestConfig> SUPPORTED_DATA_SOURCES;
-	
-	static {
-		/*
-		 *  Initialization: load the data source configuration information from /META-INF/rdbms_config.json.
-		 *  The configuration file is expected to contain the following JSON
-		   				   		"connectors": [
-   		  							{
-   		  								"url_scheme": "JDBC_URL_SCHEME",
-  	 	  								"display_name": "DATA_SOURCE_TYPE_DISPLAY_NAME",
-   		  								"driver" : "JDBC_CLASS_NAME",
-   		   								"query" : "CURRENT_DATE_QUERY"   		
-   		  							}, ...
- 		  						]			 
-          
-		 * Example configuration for DB2 and MySQL:
-				   "connectors": [
-   									{
-   										"url_scheme": "db2",
-  	 									"display_name": "DB2",
-   										"driver" : "com.ibm.db2.jcc.DB2Driver",
-   										"query" : "SELECT current date FROM sysibm.sysdummy1"   		
-   									},
-   								    {
-  			 							"url_scheme": "mysql",
-   			 							"display_name": "MySQL",
-   			 							"driver" : "com.mysql.jdbc.Driver",
-   			 							"query" : "SELECT current_date"
-  									} 
- 								]			 
-		 *
-		 */
-		SUPPORTED_DATA_SOURCES = new TreeMap<String,DatabaseAccessTestConfig>(String.CASE_INSENSITIVE_ORDER);
-			
-		InputStream is = null;
 		
-		try {
-			is = RelationalOnPremDataSource.class.getResourceAsStream("/META-INF/rdbms_config.json");
-			if(is != null) {
-				JSONObject config = null;
-				config = (JSONObject) JSON.parse(is);
-				// log to console for debug purposes
-				
-				System.out.println(config.toString());
-				
-				JSONArray connectorlist = (JSONArray) config.get("connectors");
-				JSONObject cc = null;
-				for(int i = 0; i < connectorlist.size(); i++ ) {
-				   cc = (JSONObject) connectorlist.get(i);
-				   SUPPORTED_DATA_SOURCES.put((String)cc.get("url_scheme"), 
-						                      new DatabaseAccessTestConfig((String)cc.get("display_name"),(String)cc.get("driver"),(String)cc.get("query")));
-				}
-				
-			}
-			else {
-				System.err.println("Resource /META-INF/config.json was not found");
-			}
-			
-		} 
-		catch(Exception ex) {
-			// log error to console 
-			System.err.println(ex.getMessage());
-			ex.printStackTrace(System.err);
-		}
-		finally {
-			if(is != null) {
-				try {
-					is.close();
-				}
-				catch(Exception ex) {
-					// ignore
-				}
-			}
-		}
-		
-	}
-	
 	private DatabaseAccessTestConfig accessTestConfig = null; 
 	private String jdbcURL = null;
 	private String opUser = null;
 	private String opPassword = null;
 
 	private Connection connection = null;
-
-	/**
-	 * Returns a list of data source types, for which a configuration was specified.
-	 * @return an array of strings; guaranteed to be not null
-	 */
-	public static ArrayList<String> getSupportedDataSources() {
-		
-		ArrayList<String> supportedDataSourceTypes = new ArrayList<String>();
-		
-		Iterator<DatabaseAccessTestConfig> it = SUPPORTED_DATA_SOURCES.values().iterator();
-		while(it.hasNext()) {
-			supportedDataSourceTypes.add(it.next().getURLDisplayName());
-		}
-		return supportedDataSourceTypes;
-	} // getSupportedDataSources
 		
 	/**
-	 * 
-	 * @param scheme
-	 * @param URL
-	 * @param user
-	 * @param password
+	 * Constructor.
+	 * @param scheme - the scheme component of the JDBC URL (jdbc:<scheme>//...)
+	 * @param URL - the JDBC URL to be used to connect to the on-premises data source
+	 * @param user - the user id to be used to connect to the on-premises data source
+	 * @param password - user id's password
 	 * @throws OnPremDataSourceNotSupportedException
 	 */
 	public RelationalOnPremDataSource(String scheme, String URL, String user, String password) 
-	 throws OnPremDataSourceNotSupportedException {
-				
-		accessTestConfig = SUPPORTED_DATA_SOURCES.get(scheme);
+	 throws OnPremDataSourceAccessTestConfigurationException, OnPremDataSourceNotSupportedException {
+		
+		// returns null if no configuration is defined for the specified scheme
+		accessTestConfig = OnPremDataSourceAccessTestConfiguration.getDataSourceAccessConfig(scheme);
 	
 		if(accessTestConfig == null) {
 			throw new OnPremDataSourceNotSupportedException(scheme);
@@ -169,6 +78,13 @@ public class RelationalOnPremDataSource extends OnPremDataSource {
 			// try to establish a connection
 			connection = DriverManager.getConnection(jdbcURL,opUser,opPassword);
 		}
+		catch(ClassNotFoundException cnfex) {
+			throw new OnPremDataSourceAccessTestException("Unable to load the JDBC driver " + accessTestConfig.getJDBCDriverClassName() + " for on-premises "+ accessTestConfig.getURLDisplayName() + " database.",cnfex);
+		}
+		catch(SQLException sqlex) {
+			throw new OnPremDataSourceAccessTestException("Failed to connect to on-premises "+ accessTestConfig.getURLDisplayName() + " database.",sqlex);
+		}
+
 		catch(Exception ex) {
 			throw new OnPremDataSourceAccessTestException("Failed to connect to on-premises "+ accessTestConfig.getURLDisplayName() + " database.",ex);
 		}
@@ -200,8 +116,8 @@ public class RelationalOnPremDataSource extends OnPremDataSource {
 
 	/**
 	 * 
-	 * @return the first column of the dummy query that was executed, expressed as a String
-	 * @throws OnPremResourceAccessTestException
+	 * @return the first result set column of the dummy query that was executed
+	 * @throws OnPremResourceAccessTestException, if a problem was encountered
 	 */
 	public String runQuery() 
 		throws OnPremDataSourceAccessTestException {
