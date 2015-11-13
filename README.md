@@ -10,6 +10,8 @@ For a quick introduction on how to configure the gateway service, set up user-pr
 
 This application has been pre-configured for DB2, MySQL and PostgreSQL databases. To configure support for other RDBMSs follow [these instructions](https://github.com/ibm-cds-labs/on-prem-connectivity-test-java-sample/wiki/Adding-support-for-additional-relational-databases). Note that the pre-configured application does not include the DB2 license file `db2jcc_license_cu.jar` (DB2 LUW) or `db2jcc_license_cisuz.jar` (DB2 for z/OS). Follow above instructions to make the appropriate library available to the application. 
 
+![](https://raw.githubusercontent.com/wiki/ibm-cds-labs/on-prem-connectivity-test-java-sample/images/access_test_bm_service_badge.png)
+
 ## Deploy to IBM Bluemix
 
 You can deploy this application to Bluemix using the button provided below or manually. Note that Bluemix applications can only access services that are located in the same space. You 
