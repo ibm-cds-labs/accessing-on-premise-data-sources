@@ -66,6 +66,9 @@ If you bind a service other than *user-provided* it is ignored by the applicatio
 
 Refresh the application web page to view the test results.  
 
+### Troubleshooting
+Refer to this [guide](https://github.com/ibm-cds-labs/on-prem-connectivity-test-java-sample/wiki/Addressing-sample-application-issues).
+
 ### Privacy Notice
 
 This web application includes code to track deployments to [IBM Bluemix](https://www.bluemix.net/) and other Cloud Foundry platforms. The following information is sent to a [Deployment Tracker](https://github.com/cloudant-labs/deployment-tracker) service on each deployment:
