@@ -1,5 +1,7 @@
 # Simple on-premise data source connectivity validation tool
 
+![Bluemix Deployments](https://deployment-tracker.mybluemix.net/stats/342af0e859ee71ef16193deff87d5771/badge.svg)
+
 Use this utility to validate that Bluemix applications can access on-premise data sources that you've exposed using the [Secure Gateway service](https://console.ng.bluemix.net/catalog/secure-gateway) and user-provided services.
 
 ![sample output](https://raw.githubusercontent.com/wiki/ibm-cds-labs/on-prem-connectivity-test-java-sample/images/BM_sample_app_output.png)  
