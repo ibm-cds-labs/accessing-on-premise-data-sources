@@ -1,12 +1,12 @@
-# Simple on-premise data source connectivity validation tool
+# Simple on-premises data source connectivity validation tool
 
 ![Bluemix Deployments](https://deployment-tracker.mybluemix.net/stats/342af0e859ee71ef16193deff87d5771/badge.svg)
 
-Use this utility to validate that Bluemix applications can access on-premise data sources that you've exposed using the [Secure Gateway service](https://console.ng.bluemix.net/catalog/secure-gateway) and user-provided services.
+Use this utility to validate that Bluemix applications can access on-premises data sources that you've exposed using the [Secure Gateway service](https://console.ng.bluemix.net/catalog/secure-gateway) and user-provided services.
 
 ![sample output](https://raw.githubusercontent.com/wiki/ibm-cds-labs/on-prem-connectivity-test-java-sample/images/BM_sample_app_output.png)  
 
-For a quick introduction on how to configure the gateway service, set up user-provided services and prepare your on-premise environment, read [the tutorial](https://developer.ibm.com/clouddataservices/access-an-on-premises-db2-data-server-from-the-bluemix-cloud/).
+For a quick introduction on how to configure the gateway service, set up user-provided services and prepare your on-premises environment, read [the tutorial](https://developer.ibm.com/clouddataservices/access-an-on-premises-db2-data-server-from-the-bluemix-cloud/).
 
 This application has been pre-configured for DB2, MySQL and PostgreSQL databases. To configure support for other RDBMSs follow [these instructions](https://github.com/ibm-cds-labs/on-prem-connectivity-test-java-sample/wiki/Adding-support-for-additional-relational-databases). Note that the pre-configured application does not include the DB2 license file `db2jcc_license_cu.jar` (DB2 LUW) or `db2jcc_license_cisuz.jar` (DB2 for z/OS). Follow above instructions to make the appropriate library available to the application. 
 
@@ -43,7 +43,7 @@ To manually deploy this application to Bluemix:
 
 ### Binding user-provided services
 
-On-premise data sources are typically exposed to Bluemix applications using user-provided services, as described in the tutorial. By default, no services are bound to this application and the tool therefore won't run any tests. To validate that an application can successfully use the user-provided services that you have defined, bind them to this application using the Bluemix web console or the Cloud Foundry CLI client.
+On-premises data sources are typically exposed to Bluemix applications using user-provided services, as described in the tutorial. By default, no services are bound to this application and the tool therefore won't run any tests. To validate that an application can successfully use the user-provided services that you have defined, bind them to this application using the Bluemix web console or the Cloud Foundry CLI client.
 
 #### Binding user-provided services using the Bluemix web console
   * [Log in to Bluemix](https://console.ng.bluemix.net/).
